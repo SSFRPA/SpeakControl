@@ -4,7 +4,6 @@ import { dirname, fromFileUrl } from "https://deno.land/std@0.224.0/path/mod.ts"
 import pinyin from "https://deno.land/x/pinyin@0.0.5/mod.ts"
 
 
-
 async function loadAndExecuteFiles(dirPath) {
   const modules = [];
 
@@ -132,6 +131,16 @@ function extractTextAndMode(input, modules) {
   return null; // 如果不符合任何模式，返回 null
 }
 
+function checkPlay(voice_obj) {
+  if (ssf.ai.Device.check_default_output_device()) {
+
+    ssf.ai.Device.audio_play(voice_obj);
+  }
+
+}
+// let det_pid=null
+globalThis.det_data = []
+globalThis.det_pid = null;
 
 async function main() {
   const currentFileUrl = Deno.mainModule;
@@ -166,7 +175,7 @@ async function main() {
 
 
       if (quick_text) {
-        ssf.ai.Device.audio_play(voice2);
+        checkPlay(voice2);
         console.log("=====>", quick_text.mode);
       }
 
@@ -210,7 +219,7 @@ async function main() {
 
       if (result_command.command) {
         console.log("匹配到命令----->", result_command.command.command_name, "概率:", result_command.score);
-        ssf.ai.Device.audio_play(voice2)
+        checkPlay(voice2)
         result_command.command.module.run(text)
         // if (result_command.command.module.run(quick_text.text) == 0) {
 
@@ -219,7 +228,7 @@ async function main() {
         return
 
       }
-      ssf.ai.Device.audio_play(voice1)
+      checkPlay(voice1)
 
     } catch (error) {
       console.error("出错", error)
