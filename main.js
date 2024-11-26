@@ -217,7 +217,7 @@ async function main() {
 
       const result_command = parse_text(text, modules);
 
-      if (result_command.command) {
+      if (result_command.command&&result_command.command.type=="normal") {
         console.log("匹配到命令----->", result_command.command.command_name, "概率:", result_command.score);
         checkPlay(voice2)
         result_command.command.module.run(text)

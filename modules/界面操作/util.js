@@ -6,6 +6,7 @@ export function det_element(control_type, isshow = true) {
     globalThis.det_data.length = 0
     const hwnd = ssf.Windows.get_foreground_window()
     const ele = ssf.ElementExt.parse(hwnd, "/", 3000)
+    console.log("当前定位窗口",ele.name())
     const result = []
     recursiveTraversal(ele, control_type, result)
     // const data=[]

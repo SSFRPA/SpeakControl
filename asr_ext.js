@@ -5,7 +5,7 @@ console.log("开始监听麦克风");
 let min_startTime = 0
 let max_startTime = 0
 const max_threshold =5;
-const min_threshold = 0.8;
+const min_threshold = 1.0;
 
 let seg_text = ""
 while (true) {
