@@ -25,10 +25,10 @@ export function run() {
        
         const ty_tid = ssf.Browser.create_tab("https://tongyi.aliyun.com/", 3000).id
 
-        ssf.Browser.setText(ty_tid, '//*[@id="tongyiPageLayout"]/div[3]/div/div[2]/div[1]/div[3]/div[2]/div[2]/div/textarea', current_url+" 总结一下上述说得内容", 3000)
+        ssf.Browser.setText(ty_tid, '//*[@id="tongyiPageLayout"]/div[3]/div/div[2]/div[1]/div[3]/div[2]/div/div[2]/div/textarea', current_url+" 总结一下上述说得内容", 3000)
         ssf.Sys.sleep(2000)
 
-        ssf.Browser.click(ty_tid, '/html/body/div[1]/div/div[3]/div/div[2]/div[1]/div[3]/div[2]/div[3]', 3000)
+        ssf.Browser.click(ty_tid, '/html/body/div[1]/div/div[3]/div/div[2]/div[1]/div[3]/div[2]/div/div[3]', 3000)
 
 
 

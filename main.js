@@ -132,7 +132,7 @@ function extractTextAndMode(input, modules) {
 }
 
 function checkPlay(voice_obj) {
-  if (ssf.ai.Device.check_default_output_device()) {
+  if (ssf.ai.Device.check_default_output_device()&&globalThis.sleep_mode==false) {
 
     ssf.ai.Device.audio_play(voice_obj);
   }
@@ -152,6 +152,11 @@ async function main() {
   //全局环境加载
   ssf.Browser.listen()
   ssf.ai.Device.init_audio()
+  ssf.Frame.init()
+  ssf.ai.OCR.init_model("./models/ppocrv4server/");
+  // ssf.ai.OCR.init_model("./models/ppocrv4server/");
+  // ssf.ai.OCR.init_model("./models/ppocrv4/");
+
   const voice1 = ssf.ai.Device.load_audio("./voice_files/1.wav")
   const voice2 = ssf.ai.Device.load_audio("./voice_files/2.mp3")
   if (!ssf.ai.Device.check_default_input_device()) {

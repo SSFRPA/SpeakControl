@@ -41,10 +41,10 @@ function get_current_text() {
         ssf.Windows.switch_to_this_window(chrome_app.native_window_handle())
         const tid = ssf.Browser.create_tab("https://tongyi.aliyun.com/", 3000).id
 
-        ssf.Browser.setText(tid, '//*[@id="tongyiPageLayout"]/div[3]/div/div[2]/div[1]/div[3]/div[2]/div[2]/div/textarea', v, 3000)
+        ssf.Browser.setText(tid, '//*[@id="tongyiPageLayout"]/div[3]/div/div[2]/div[1]/div[3]/div[2]/div/div[2]/div/textarea', v, 3000)
         ssf.Sys.sleep(2000)
 
-        ssf.Browser.click(tid, '/html/body/div[1]/div/div[3]/div/div[2]/div[1]/div[3]/div[2]/div[3]', 3000)
+        ssf.Browser.click(tid, '/html/body/div[1]/div/div[3]/div/div[2]/div[1]/div[3]/div[2]/div/div[3]', 3000)
       
 
 

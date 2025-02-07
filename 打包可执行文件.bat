@@ -32,6 +32,8 @@ robocopy "env" "bin" /S /XF *.exe
 robocopy "models" "bin/models" /S /XF *.exe
 robocopy "ui_ext" "bin/ui_ext" /S 
 robocopy "voice_files" "bin/voice_files" /S 
+robocopy "ext_tools" "bin/ext_tools" /S 
+
 
 
 

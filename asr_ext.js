@@ -10,6 +10,7 @@ const min_threshold = 1.0;
 let seg_text = ""
 while (true) {
     try {
+        // console.log("监听中.....")
         const text = ssf.ai.ASR.get_result_with_timeout(100);
         if (seg_text == "") {
             min_startTime = new Date();

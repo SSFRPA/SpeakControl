@@ -13,7 +13,7 @@ export function det_element(control_type, isshow = true) {
     let index = 1;
     result.forEach(element => {
         const rect = element.bounding_rectangle()
-        // console.log(JSON.stringify(rect), element.name())
+        console.log(JSON.stringify(rect), element.name())
         globalThis.det_data.push({
             x: Math.floor((rect.x + rect.w / 2)),
             y: Math.floor((rect.y + rect.h / 2)),
