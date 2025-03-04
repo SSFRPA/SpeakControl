@@ -1,7 +1,7 @@
 import { existsSync } from "https://deno.land/std@0.221.0/fs/mod.ts";
 
 export function run(text) {
-    ssf.Frame.init()
+    // ssf.Frame.init()
     if (!existsSync('./screenshot')) {
         Deno.mkdirSync("./screenshot", { recursive: true });
     }

@@ -1,7 +1,7 @@
 import { basename } from "https://deno.land/std@0.182.0/path/mod.ts";
 import * as util from "./kg_until.ts";
 
-ssf.Frame.init();
+
 
 function set_foucs(hwnd, path) {
     ssf.Windows.set_foreground_window(hwnd);
@@ -69,7 +69,7 @@ export function run(text) {
         //     5000,
         // );
         if (play_all.name().indexOf("播放全部") > -1) {
-            play_all.click();
+            play_all.double_click();
         }
     } catch (error) {
         console.log(error);

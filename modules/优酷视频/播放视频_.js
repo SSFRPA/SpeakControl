@@ -1,5 +1,4 @@
 import { basename } from "https://deno.land/std@0.182.0/path/mod.ts";
-ssf.Frame.init();
 
 function set_foucs(hwnd, path) {
     ssf.Windows.set_foreground_window(hwnd);
@@ -49,7 +48,7 @@ export function run(text) {
         const edge_hwnd = chrome_app.native_window_handle();
         set_foucs(edge_hwnd, "/");
         const tabinfo = ssf.Browser.current_tab(10000);
-        if (tabinfo.url.indexOf("so.youku.com/search_video") > 0) {
+        if (tabinfo.url.indexOf("so.youku.com/search") > 0) {
             const listhtml = ssf.Browser.getHTML(
                 tabinfo.id,
                 '//*[@type="1027"]',
@@ -58,7 +57,7 @@ export function run(text) {
             if (listhtml) {
                 ssf.Browser.click(
                     tabinfo.id,
-                    `(//*[@class="leftarea_KerA8 program-card-left"])[${num}]/a`,
+                    `(//*[@data-spm="PhoneSokuProgram_${num}"])/div/div/a`,
                     30000,
                 );
                 // console.log(

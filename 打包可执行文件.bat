@@ -16,7 +16,7 @@ for /r modules %%f in (*.js) do (
 )
 
 REM 构建最终的Deno编译命令
-set "DENOCMD=.\env\deno.exe compile --allow-all --unstable --no-check --output .\bin\main.exe !INCLUDES! --include asr_ext.js  --node-modules-dir ./main.js"
+set "DENOCMD=.\env\deno.exe compile --allow-all --unstable --no-check  --output .\bin\SpeakControl_Main.exe !INCLUDES! --include asr_ext.js  --node-modules-dir ./main.js"
 
 REM 输出构建的命令以便检查
 echo %DENOCMD%
@@ -30,7 +30,9 @@ robocopy "env" "bin" /S /XF *.exe
 @REM robocopy "modules" "bin/modules" /S /XF *.exe
 
 robocopy "models" "bin/models" /S /XF *.exe
-robocopy "ui_ext" "bin/ui_ext" /S 
+@REM robocopy "ui_ext" "bin/ui_ext" /S 
+robocopy "ui_ext" "bin/" /S 
+
 robocopy "voice_files" "bin/voice_files" /S 
 robocopy "ext_tools" "bin/ext_tools" /S 
 

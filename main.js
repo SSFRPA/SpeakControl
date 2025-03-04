@@ -2,6 +2,7 @@
 import * as mod from "https://deno.land/std@0.224.0/fs/mod.ts";
 import { dirname, fromFileUrl } from "https://deno.land/std@0.224.0/path/mod.ts";
 import pinyin from "https://deno.land/x/pinyin@0.0.5/mod.ts"
+import * as ui_until from "./ui_untils.js";
 
 
 async function loadAndExecuteFiles(dirPath) {
@@ -132,7 +133,7 @@ function extractTextAndMode(input, modules) {
 }
 
 function checkPlay(voice_obj) {
-  if (ssf.ai.Device.check_default_output_device()&&globalThis.sleep_mode==false) {
+  if (ssf.ai.Device.check_default_output_device() && globalThis.current_mode.mode != "睡眠模式") {
 
     ssf.ai.Device.audio_play(voice_obj);
   }
@@ -140,6 +141,7 @@ function checkPlay(voice_obj) {
 }
 // let det_pid=null
 globalThis.det_data = []
+globalThis.dpi_ratio = 1.5
 globalThis.det_pid = null;
 
 async function main() {
@@ -169,13 +171,14 @@ async function main() {
 
   const asr_ext_worker = new Worker(import.meta.resolve("./asr_ext.js"), { type: "module" });
   //默认是命令模式
-  const current_mode = { mode: "command", module: null };
+  globalThis.current_mode = { mode: "command", module: null };
+  await ui_until.log("语音启动成功")
 
   asr_ext_worker.onmessage = async (e) => {
     try {
       const text = e.data
       console.log("-------", text);
-
+      await ui_until.log(text)
       const quick_text = extractTextAndMode(text, modules);
 
 
@@ -192,17 +195,17 @@ async function main() {
       for (const element of modules) {
 
         if (quick_text && element.command_name == quick_text.mode && quick_text.mode == "模式切换") {
-          element.module.run(quick_text.text, modules, current_mode)
-          if (quick_text.text != current_mode.mode) {
+          element.module.run(quick_text.text, modules, globalThis.current_mode)
+          if (quick_text.text != globalThis.current_mode.mode) {
             // ssf.ai.Device.audio_play(voice2)
 
-            console.log("模式切换", current_mode.mode)
+            console.log("模式切换", globalThis.current_mode.mode)
             return
 
           }
 
         }
-        if (quick_text && element.command_name == quick_text.mode && quick_text.mode != "模式切换" && current_mode.mode != "lock") {
+        if (quick_text && element.command_name == quick_text.mode && quick_text.mode != "模式切换" && globalThis.current_mode.mode != "lock" && globalThis.current_mode.mode != "睡眠模式") {
           // console.log(quick_text)
           // console.log(element.module, element)
           element.module.run(quick_text.text)
@@ -214,15 +217,18 @@ async function main() {
 
 
 
-      if (current_mode.mode == "lock") {
+      if (globalThis.current_mode.mode == "lock" || globalThis.current_mode.mode == "睡眠模式") {
         console.log("-----------------")
-        current_mode.module?.run(text)
+        if (globalThis.current_mode.module) {
+          globalThis.current_mode.module?.run(text)
+
+        }
         return
       }
 
       const result_command = parse_text(text, modules);
 
-      if (result_command.command&&result_command.command.type=="normal") {
+      if (result_command.command && result_command.command.type == "normal") {
         console.log("匹配到命令----->", result_command.command.command_name, "概率:", result_command.score);
         checkPlay(voice2)
         result_command.command.module.run(text)

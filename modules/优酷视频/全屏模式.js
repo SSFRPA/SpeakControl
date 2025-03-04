@@ -1,5 +1,5 @@
 import { basename } from "https://deno.land/std@0.182.0/path/mod.ts";
-ssf.Frame.init();
+
 
 function set_foucs(hwnd, path) {
     ssf.Windows.set_foreground_window(hwnd);
@@ -49,7 +49,7 @@ export function run(text) {
         const edge_hwnd = chrome_app.native_window_handle();
         set_foucs(edge_hwnd, "/");
         const tabinfo = ssf.Browser.current_tab(10000);
-        if (tabinfo.url.indexOf("v.youku.com/v_show") > 0) {
+        if (tabinfo.url.indexOf("v.youku.com/video") > 0) {
             const listhtml = ssf.Browser.getHTML(
                 tabinfo.id,
                 '//*[@id="ykPlayer"]',

@@ -1,5 +1,5 @@
 import { basename } from "https://deno.land/std@0.182.0/path/mod.ts";
-ssf.Frame.init();
+
 
 function set_foucs(hwnd, path) {
     ssf.Windows.set_foreground_window(hwnd);

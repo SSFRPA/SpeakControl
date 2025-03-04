@@ -1,7 +1,7 @@
 import { basename } from "https://deno.land/std@0.182.0/path/mod.ts";
 import * as util from "./kg_until.ts";
 
-ssf.Frame.init();
+
 
 function set_foucs(hwnd, path) {
     ssf.Windows.set_foreground_window(hwnd);
@@ -48,7 +48,7 @@ export function run(text) {
             console.log(error)
         }
      
-        ssf.ElementExt.parse(app_hwnd,'/Custom[2]/Custom[13]/Custom[6]/Custom[2]/Custom[1]/Image[2]',5000).click();
+        ssf.ElementExt.parse(app_hwnd,'/Custom[2]/Custom[11]/Custom[6]/Custom[2]/Custom[1]/Image[2]',5000).click();
     } catch (error) {
         console.log(error);
     }
