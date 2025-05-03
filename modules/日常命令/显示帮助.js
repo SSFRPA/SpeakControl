@@ -141,7 +141,9 @@ export async function display_help() {
                 a: 1.0,
                 font_size: 24,
                 delay: 5000,
-                id: index + 2
+                id: index + 2,
+                border_only:false,
+
             });
 
             // 更新 X 坐标以放置下一个元素

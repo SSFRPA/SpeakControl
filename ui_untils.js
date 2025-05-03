@@ -43,14 +43,61 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
+export async  function print(text,timeout=5000) {
+    const screen_info= ssf.Frame.screen_info()
+    const dpi=1.0;
+    const color=colors[6];
+    // console.log(screen_info.width,screen_info)
+    const log_rect={
+
+        // x: 0,
+        // y: 0,
+        x: Math.floor(screen_info.width /2/dpi)-400,
+        y: Math.floor(screen_info.height/dpi- 200),
+        width: 800,
+        height: 100,
+        r: color.r,
+        g: color.g,
+        b: color.b,
+        text:text,
+        a:0.7,
+        font_size:30,
+        delay: timeout,
+        id:1,
+        border_only:false,
+    }
+    const det_data=[]
+
+    det_data.push(log_rect)
+    // console.log(JSON.stringify(det_data) )
+    const data={
+        "is_focus":false,
+        "scroll_y": 0,
+        "detData":  det_data,
+        "restart":false
+    }
+  
+     const requestModel= {
+        url: 'http://127.0.0.1:51515/det_data',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(data),
+        timeout: 5000 // 5秒超时
+      };
+      await  ssf.Request.post([requestModel]);
+
+
+}
+
 
 export async  function log(text,timeout=5000) {
-    if (globalThis.current_mode.mode=="睡眠模式") {
+    if (globalThis.current_mode&&globalThis.current_mode.mode=="睡眠模式") {
         return;
         
     }
     const screen_info= ssf.Frame.screen_info()
-    const dpi=globalThis.dpi_ratio;
+    const dpi=1.0;
     const color=colors[3];
     // console.log(screen_info.width,screen_info)
     const log_rect={
@@ -68,35 +115,19 @@ export async  function log(text,timeout=5000) {
         a:0.5,
         font_size:30,
         delay: timeout,
-        id:1
-
+        id:1,
+        border_only:false,
     }
     const det_data=[]
-    // det_data.push({
-    //     x: parseInt(rect.x / dpi),
-    //     y: parseInt(rect.y / dpi),
-    //     width: parseInt(rect.w / dpi),
-    //     height: parseInt(rect.h / dpi),
-    //     // x: rect.x,
-    //     // y: rect.y,
-    //     r: color.r,
-    //     g: color.g,
-    //     b: color.b,
-    //     a: 0.4,
-    //     font_size: 10,
-    //     text: "",
-    //     // radius: 15,
-    //     id: index,
-    //     delay: 8000
-    // })
+
     det_data.push(log_rect)
+    // console.log(JSON.stringify(det_data) )
     const data={
         "is_focus":false,
         "scroll_y": 0,
         "detData":  det_data,
         "restart":false
     }
-    // console.log(JSON.stringify(data))
   
      const requestModel= {
         url: 'http://127.0.0.1:51515/det_data',
@@ -107,19 +138,6 @@ export async  function log(text,timeout=5000) {
         timeout: 5000 // 5秒超时
       };
       await  ssf.Request.post([requestModel]);
-    //   ssf.Request.post([requestModel])
-    //     .then((results) => {
-    //       const result = results[0];
-    //       console.log(`请求成功: ${result.text}`);
-    //     })
-    //     .catch((error) => {
-    //       console.error('请求失败:', error);
-    //     });
+
 
 }
-// globalThis.dpi_ratio=1.5
-// ssf.Frame.init()
-// await log("11111111111")
-// // ssf.Sys.sleep(2000)
-
-// await log("你好,上山打老虎,1234561111111111111117")

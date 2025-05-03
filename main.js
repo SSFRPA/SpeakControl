@@ -5,6 +5,29 @@ import pinyin from "https://deno.land/x/pinyin@0.0.5/mod.ts"
 import * as ui_until from "./ui_untils.js";
 
 
+
+function find_task_bar(name, timeout_ms) {
+  const startTime = Date.now();
+  while (true) {
+
+      const windows = ssf.Windows.enum_windows();
+      const foundChild = windows.find(child => child.title.indexOf(name) >= 0);
+      if (foundChild) {
+          const ele=ssf.ElementExt.parse(foundChild.hwnd,"/",timeout_ms)
+          return ele;
+      }
+
+      const elapsedTime = Date.now() - startTime;
+
+      if (elapsedTime >= timeout_ms) {
+          throw new Error('Element search timed out');
+      }
+
+      ssf.Sys.sleep(200);
+  }
+}
+ssf.ElementExt.find_task_bar=find_task_bar;
+
 async function loadAndExecuteFiles(dirPath) {
   const modules = [];
 
@@ -132,16 +155,10 @@ function extractTextAndMode(input, modules) {
   return null; // 如果不符合任何模式，返回 null
 }
 
-function checkPlay(voice_obj) {
-  if (ssf.ai.Device.check_default_output_device() && globalThis.current_mode.mode != "睡眠模式") {
 
-    ssf.ai.Device.audio_play(voice_obj);
-  }
-
-}
 // let det_pid=null
 globalThis.det_data = []
-globalThis.dpi_ratio = 1.5
+globalThis.dpi_ratio = 1.0
 globalThis.det_pid = null;
 
 async function main() {
@@ -153,20 +170,12 @@ async function main() {
 
   //全局环境加载
   ssf.Browser.listen()
-  ssf.ai.Device.init_audio()
   ssf.Frame.init()
   ssf.ai.OCR.init_model("./models/ppocrv4server/");
   // ssf.ai.OCR.init_model("./models/ppocrv4server/");
   // ssf.ai.OCR.init_model("./models/ppocrv4/");
 
-  const voice1 = ssf.ai.Device.load_audio("./voice_files/1.wav")
-  const voice2 = ssf.ai.Device.load_audio("./voice_files/2.mp3")
-  if (!ssf.ai.Device.check_default_input_device()) {
-    console.log("未开启麦克风设备,请打开后重新运行程序")
-  }
-  if (!ssf.ai.Device.check_default_output_device()) {
-    console.log("未开启扬声器设备,请打开后重新运行程序")
-  }
+ 
 
 
   const asr_ext_worker = new Worker(import.meta.resolve("./asr_ext.js"), { type: "module" });
@@ -183,7 +192,7 @@ async function main() {
 
 
       if (quick_text) {
-        checkPlay(voice2);
+        // checkPlay(voice2);
         console.log("=====>", quick_text.mode);
       }
 
@@ -230,7 +239,7 @@ async function main() {
 
       if (result_command.command && result_command.command.type == "normal") {
         console.log("匹配到命令----->", result_command.command.command_name, "概率:", result_command.score);
-        checkPlay(voice2)
+        // checkPlay(voice2)
         result_command.command.module.run(text)
         // if (result_command.command.module.run(quick_text.text) == 0) {
 
@@ -239,7 +248,6 @@ async function main() {
         return
 
       }
-      checkPlay(voice1)
 
     } catch (error) {
       console.error("出错", error)

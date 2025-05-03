@@ -76,13 +76,13 @@ function recursiveTraversal(element, control_type, result) {
 }
 export function task_bar() {
     const temp = ssf.ElementExt.get_root_element().childs()
-    const result=[]
+    const result = []
     for (const t of temp) {
         // console.log(t.name())
-        if (t.name()=="任务栏") {
-            const task_bar_eles=t.childs()
+        if (t.name() == "任务栏") {
+            const task_bar_eles = t.childs()
             for (const task_bar_ele of task_bar_eles) {
-                if(task_bar_ele.name()=="DesktopWindowXamlSource"){
+                if (task_bar_ele.name() == "DesktopWindowXamlSource") {
                     recursiveTraversal(task_bar_ele, ["Button"], result);
                 }
             }
@@ -116,7 +116,9 @@ export function task_bar() {
             text: "",
             // radius: 15,
             id: index,
-            delay: 8000
+            delay: 8000,
+            border_only: true,
+
             // text:element.name()
 
 
@@ -137,7 +139,9 @@ export function task_bar() {
             text: "",
             // radius: 15,
             id: index,
-            delay: 8000
+            delay: 8000,
+            border_only: true,
+
         })
         index = index + 1
     });
@@ -145,7 +149,7 @@ export function task_bar() {
         "is_focus": true,
         "scroll_y": 0,
         "detData": det_data,
-        "restart":false
+        "restart": false
     }
 
 
@@ -203,7 +207,9 @@ export function det_element(control_type) {
             text: "",
             // radius: 15,
             id: index,
-            delay: 8000
+            delay: 8000,
+            border_only: true,
+
             // text:element.name()
 
 
@@ -224,7 +230,9 @@ export function det_element(control_type) {
             text: "",
             // radius: 15,
             id: index,
-            delay: 8000
+            delay: 8000,
+            border_only: true,
+
         })
         index = index + 1
     });
@@ -232,7 +240,7 @@ export function det_element(control_type) {
         "is_focus": false,
         "scroll_y": 0,
         "detData": det_data,
-        "restart":false
+        "restart": false
 
     }
 

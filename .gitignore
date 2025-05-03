@@ -5,6 +5,9 @@
 *.zip
 /record.ts
 /modules/央视频道
-/测试
+/测试/*
 /测试.bat
 /modules/界面操作/前进.js
+/测试/test.js
+/private_key.data
+/records/*
