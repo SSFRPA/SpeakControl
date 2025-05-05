@@ -182,7 +182,7 @@ async function main() {
   //默认是命令模式
   globalThis.current_mode = { mode: "command", module: null };
   await ui_until.log("语音启动成功")
-
+  globalThis.asr_ext_worker=asr_ext_worker
   asr_ext_worker.onmessage = async (e) => {
     try {
       const text = e.data
@@ -203,18 +203,18 @@ async function main() {
       // }
       for (const element of modules) {
 
-        if (quick_text && element.command_name == quick_text.mode && quick_text.mode == "模式切换") {
+        if (quick_text && element.command_name == quick_text.mode && quick_text.mode == "增强型自动化模式切换") {
           element.module.run(quick_text.text, modules, globalThis.current_mode)
           if (quick_text.text != globalThis.current_mode.mode) {
             // ssf.ai.Device.audio_play(voice2)
 
-            console.log("模式切换", globalThis.current_mode.mode)
+            console.log("增强型自动化模式切换", globalThis.current_mode.mode)
             return
 
           }
 
         }
-        if (quick_text && element.command_name == quick_text.mode && quick_text.mode != "模式切换" && globalThis.current_mode.mode != "lock" && globalThis.current_mode.mode != "睡眠模式") {
+        if (quick_text && element.command_name == quick_text.mode && quick_text.mode != "增强型自动化模式切换" && globalThis.current_mode.mode != "lock" && globalThis.current_mode.mode != "睡眠模式") {
           // console.log(quick_text)
           // console.log(element.module, element)
           element.module.run(quick_text.text)

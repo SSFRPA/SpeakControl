@@ -1,4 +1,6 @@
+import * as ui_until from "./ui_untils.js";
 
+ssf.Frame.init()
 ssf.ai.Device.init_audio()
 
 const voice1 = ssf.ai.Device.load_audio("./voice_files/1.wav")
@@ -20,13 +22,12 @@ if (!ssf.ai.Device.check_default_output_device()) {
 
 ssf.ai.ASR.listen_input("./models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20", "./models/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01", 2.4, 0.01, 10.0, 0);
 ssf.ai.ASR.enable_capslock_listen(false)
-const enable_kws = true;
-ssf.ai.ASR.enable_kws(enable_kws)
+ssf.ai.ASR.enable_kws(true)
 console.log("开始监听麦克风");
 let min_startTime = 0
 let max_startTime = 0
-const max_threshold = 5;
-const min_threshold = 1.4;
+const max_threshold = 10;
+const min_threshold = 1.2;
 
 let last_text = ""
 
@@ -56,30 +57,96 @@ function set_init() {
 }
 function set_asr_sleep() {
 
-    if (asr_walkup && enable_kws) {
+    if (ssf.ai.ASR.get_asr_state() && ssf.ai.ASR.get_kws_state()&&mode=="唤醒模式") {
 
-        asr_walkup = false
+        // asr_walkup = false
         ssf.ai.ASR.set_asr_sleep()
 
     }
 }
-let asr_walkup = false
-while (true) {
+// let asr_walkup = false
+// while (true) {
+
+
+// }
+
+let mode="唤醒模式"
+function change_mode(text) {
+    mode=text;
+    ui_until.print("切换到"+text);
+
+    switch (text) {
+        case "命令模式":
+            {
+                //命令模式下关闭唤醒 并开启capslock监听
+                // ssf.ai.ASR.enable_kws(false)
+                ssf.ai.ASR.set_asr_walkup()
+                ssf.ai.ASR.enable_capslock_listen(true)
+            }
+            break;
+        case "输入模式":
+            {
+                ssf.ai.ASR.set_asr_walkup()
+                // ssf.ai.ASR.enable_kws(false)
+                ssf.ai.ASR.enable_capslock_listen(true)
+            }
+            break;
+        case "唤醒模式":
+            {
+                // ssf.ai.ASR.enable_kws(true)
+                ssf.ai.ASR.set_asr_walkup()
+
+                ssf.ai.ASR.enable_capslock_listen(false)
+            }
+            break;
+        case "翻译模式":
+            {
+                // ssf.ai.ASR.enable_kws(false)
+                ssf.ai.ASR.set_asr_walkup()
+
+                ssf.ai.ASR.enable_capslock_listen(true)
+            }
+            break;
+    }
+    self.postMessage("增强型自动化模式切换" + text)
+
+}
+
+// self.onmessage = async (e) => {
+//     // console.log(e)
+//     if (e.data == "唤醒模式") {
+//         ssf.ai.ASR.enable_kws(true)
+//         ssf.ai.ASR.enable_capslock_listen(false)
+//     }
+// }
+// 基础轮询 - 每隔一段时间检查一次条件
+const pollInterval = setInterval(async () => {
     try {
-        // console.log("监听中.....")
-        if (enable_kws && !asr_walkup) {
-            const kws_text = ssf.ai.ASR.get_kws_result_with_timeout(10);
+        // console.log("监听中.....",ssf.ai.ASR.get_kws_state(),ssf.ai.ASR.get_asr_state())
+        const kws_text = ssf.ai.ASR.get_kws_result_with_timeout(10);
+        //模式和中断优先触发
+        if (kws_text.indexOf("中断命令") > -1) {
+            console.log("触发中断命令")
+            await break_command()
+            return
+        }
+        if (kws_text.indexOf("模式") > 0) {
+            change_mode(kws_text.substring(2, kws_text.length))
+            return
+        }
+        if (ssf.ai.ASR.get_kws_state() && !ssf.ai.ASR.get_asr_state()) {
+
+
             if (kws_text != "") {
-                console.log(kws_text, "唤醒词")
+                // console.log(kws_text, "唤醒词")
+                ui_until.print("海棠被唤醒，请下答指令")
                 checkPlay(voice2)
                 ssf.ai.ASR.set_asr_walkup()
-                ssf.ai.ASR.set_end_point()
-                asr_walkup = true
+                // ssf.ai.ASR.set_end_point()
+                // asr_walkup = true
             }
         }
 
-
-        // console.log(kws_text,"??????")
 
         const text = ssf.ai.ASR.get_result_with_timeout(10);
         // console.log(text)
@@ -101,12 +168,12 @@ while (true) {
             if (mininterval >= min_threshold) {
                 // console.log("min")
                 ssf.ai.ASR.set_end_point()
-                if (text == "中断命令") {
-                    console.log("触发中断命令")
-                    await break_command()
-                    break
+                // if (text == "中断命令") {
+                //     console.log("触发中断命令")
+                //     await break_command()
+                //     return
 
-                }
+                // }
 
                 if (last_text != "") {
                     // console.log("触发发送")
@@ -118,7 +185,7 @@ while (true) {
                 }
                 last_text = ""
                 set_init()
-                continue
+                return
 
             }
             // min_startTime = new Date();
@@ -129,12 +196,12 @@ while (true) {
 
                 ssf.ai.ASR.set_end_point()
 
-                if (text == "中断命令") {
-                    console.log("触发中断命令")
-                    await break_command()
-                    break
+                // if (text == "中断命令") {
+                //     console.log("触发中断命令")
+                //     await break_command()
+                //     return
 
-                }
+                // }
 
                 self.postMessage(last_text)
                 set_asr_sleep()
@@ -144,7 +211,7 @@ while (true) {
                 set_init()
 
                 // seg_text = ""
-                continue
+                return
             }
             // seg_text += text;
 
@@ -154,5 +221,4 @@ while (true) {
         // seg_text = "";
         console.log(error)
     }
-
-}
+}, 30); // 每秒检查一次
