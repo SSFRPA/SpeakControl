@@ -4,29 +4,131 @@ import { dirname, fromFileUrl } from "https://deno.land/std@0.224.0/path/mod.ts"
 import pinyin from "https://deno.land/x/pinyin@0.0.5/mod.ts"
 import * as ui_until from "./ui_untils.js";
 
+import SysTray from "https://deno.land/x/systray@v0.3.0/mod.ts";
+const currentFileUrl = Deno.mainModule;
+const currentFilePath = fromFileUrl(currentFileUrl);
+const currentDirPath = dirname(currentFilePath);
+
+
+const show_tray = true;
+const topwindws = ssf.Windows.enum_windows();
+
+function find_main_hwnd(show = true) {
+  topwindws.forEach(element => {
+    if (element.title.indexOf("SpeakControl_Main") > 0) {
+      // console.log("找到目标程序", element.hwnd)
+      if (show) {
+
+        ssf.Windows.set_window_pos(element.hwnd, 0, 0, 1024, 768, ssf.enums.WndInsertAfter.HWND_TOP, ssf.enums.SetwindowposFlags.SWP_SHOWWINDOW)
+
+      } else {
+        ssf.Windows.set_window_pos(element.hwnd, 0, 0, 1024, 768, ssf.enums.WndInsertAfter.HWND_TOP, ssf.enums.SetwindowposFlags.SWP_HIDEWINDOW)
+
+      }
+    }
+  });
+}
+find_main_hwnd(false)
+
+if (show_tray) {
+
+  const Item1 = {
+    title: '显示调试窗口',
+    tooltip: '调试窗口',
+    // checked is implemented by plain text in linux
+    checked: true,
+    enabled: true,
+    // click is not a standard property but a custom value
+    click: () => {
+      Item1.checked = !Item1.checked
+      if (Item1.checked) {
+        Item1.title = "显示调试窗口"
+        find_main_hwnd(false)
+
+      } else {
+        Item1.title = "隐藏调试窗口"
+        find_main_hwnd(true)
+
+      }
+      systray.sendAction({
+        type: 'update-item',
+        item: Item1,
+      })
+    }
+  }
+
+
+  const ItemExit = {
+    title: '退出',
+    tooltip: 'Exit the menu',
+    checked: false,
+    enabled: true,
+    click: () => {
+      systray.kill()
+    }
+  }
+  // console.log(`${currentDirPath}\\icos\\icon.ico`)
+  const systray = new SysTray({
+    menu: {
+      // Use .png icon in macOS/Linux and .ico format in windows
+      icon: Deno.build.os === 'windows' ? `./icos/ico.ico` : './icos/ico.png',
+      // A template icon is a transparency mask that will appear to be dark in light mode and light in dark mode
+      isTemplateIcon: Deno.build.os === 'darwin',
+      title: "Title",
+      tooltip: "Tooltip",
+      items: [
+        Item1,
+        // Item2,
+        SysTray.separator, // SysTray.separator is equivalent to a MenuItem with "title" equals "<SEPARATOR>"
+        ItemExit
+      ],
+    },
+    debug: true, // log actions
+    directory: 'bin' // cache directory of binary package
+  });
+  // console.log(systray)
+  systray.on('click', (action) => {
+    if (action.item.click) {
+      action.item.click();
+    }
+  });
+
+  systray.on('ready', () => {
+    console.log('tray started!');
+  });
+
+  systray.on('exit', () => {
+    console.log('exited');
+  });
+
+  systray.on('error', (error) => {
+    console.log(error);
+  });
+
+}
 
 
 function find_task_bar(name, timeout_ms) {
   const startTime = Date.now();
   while (true) {
 
-      const windows = ssf.Windows.enum_windows();
-      const foundChild = windows.find(child => child.title.indexOf(name) >= 0);
-      if (foundChild) {
-          const ele=ssf.ElementExt.parse(foundChild.hwnd,"/",timeout_ms)
-          return ele;
-      }
+    const windows = ssf.Windows.enum_windows();
+    const foundChild = windows.find(child => child.title.indexOf(name) >= 0);
+    if (foundChild) {
+      const ele = ssf.ElementExt.parse(foundChild.hwnd, "/", timeout_ms)
+      return ele;
+    }
 
-      const elapsedTime = Date.now() - startTime;
+    const elapsedTime = Date.now() - startTime;
 
-      if (elapsedTime >= timeout_ms) {
-          throw new Error('Element search timed out');
-      }
+    if (elapsedTime >= timeout_ms) {
+      throw new Error('Element search timed out');
+    }
 
-      ssf.Sys.sleep(200);
+    ssf.Sys.sleep(200);
   }
 }
-ssf.ElementExt.find_task_bar=find_task_bar;
+ssf.ElementExt.find_task_bar = find_task_bar;
 
 async function loadAndExecuteFiles(dirPath) {
   const modules = [];
@@ -162,9 +264,7 @@ globalThis.dpi_ratio = 1.0
 globalThis.det_pid = null;
 
 async function main() {
-  const currentFileUrl = Deno.mainModule;
-  const currentFilePath = fromFileUrl(currentFileUrl);
-  const currentDirPath = dirname(currentFilePath);
+
   const modules = await loadAndExecuteFiles(currentDirPath + "\\modules");
 
 
@@ -175,14 +275,14 @@ async function main() {
   // ssf.ai.OCR.init_model("./models/ppocrv4server/");
   // ssf.ai.OCR.init_model("./models/ppocrv4/");
 
- 
+
 
 
   const asr_ext_worker = new Worker(import.meta.resolve("./asr_ext.js"), { type: "module" });
   //默认是命令模式
   globalThis.current_mode = { mode: "command", module: null };
   await ui_until.log("语音启动成功")
-  globalThis.asr_ext_worker=asr_ext_worker
+  globalThis.asr_ext_worker = asr_ext_worker
   asr_ext_worker.onmessage = async (e) => {
     try {
       const text = e.data

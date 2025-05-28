@@ -16,7 +16,7 @@ for /r modules %%f in (*.js) do (
 )
 
 REM 构建最终的Deno编译命令
-set "DENOCMD=.\env\deno.exe compile --allow-all --unstable --no-check  --output .\bin\SpeakControl_Main.exe !INCLUDES! --include asr_ext.js  --node-modules-dir ./main.js"
+set "DENOCMD=.\env\deno.exe compile --allow-all --unstable --no-check  --output .\bin\SpeakControl_Main.exe !INCLUDES! --include asr_ext.js  ./main.js"
 
 REM 输出构建的命令以便检查
 echo %DENOCMD%
