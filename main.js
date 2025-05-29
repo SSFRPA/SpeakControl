@@ -28,7 +28,7 @@ function find_main_hwnd(show = true) {
     }
   });
 }
-find_main_hwnd(false)
+find_main_hwnd(true)
 
 if (show_tray) {
 
@@ -84,7 +84,7 @@ if (show_tray) {
       ],
     },
     debug: true, // log actions
-    directory: 'bin' // cache directory of binary package
+    directory: 'tray' // cache directory of binary package
   });
   // console.log(systray)
   systray.on('click', (action) => {

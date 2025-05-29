@@ -35,6 +35,8 @@ robocopy "ui_ext" "bin/" /S
 
 robocopy "voice_files" "bin/voice_files" /S 
 robocopy "ext_tools" "bin/ext_tools" /S 
+robocopy "icos" "bin/icos" /S 
+robocopy "tray" "bin/tray" /S 
 
 
 
