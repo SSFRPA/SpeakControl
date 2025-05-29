@@ -28,7 +28,7 @@ function find_main_hwnd(show = true) {
     }
   });
 }
-find_main_hwnd(true)
+find_main_hwnd(false)
 
 if (show_tray) {
 
