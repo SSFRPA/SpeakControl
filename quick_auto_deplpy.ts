@@ -26,11 +26,11 @@ function vscode_setup() {
 
     if (vscodePath == "未找到") {
         const default_vscodePath = "Programs\\VSCode\\";
-       
-		ssf.Windows.cmd("./temp/VSCodeUserSetup-x64-1.88.1.exe", ["/verysilent", `/dir="${default_vscodePath}"`,"/mergetasks=!runcode"])
-        vscodePath=default_vscodePath
-		vscodePath = ssf.Windows.get_reg_value("\\HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{771FD6B0-FA20-440A-A002-3B3BAC16DC50}_is1", "InstallLocation")
-		console.log("vscode安装在",vscodePath)
+
+        ssf.Windows.cmd("./temp/VSCodeUserSetup-x64-1.88.1.exe", ["/verysilent", `/dir="${default_vscodePath}"`, "/mergetasks=!runcode"])
+        vscodePath = default_vscodePath
+        vscodePath = ssf.Windows.get_reg_value("\\HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{771FD6B0-FA20-440A-A002-3B3BAC16DC50}_is1", "InstallLocation")
+        console.log("vscode安装在", vscodePath)
         ssf.Sys.sleep(2000)
         //
     }
@@ -45,7 +45,7 @@ function vscode_setup() {
 
 
 }
-function vs_open(){
+function vs_open() {
     const currentDirectory = Deno.cwd();
     // const parentDirectory =dirname(currentDirectory);
     const pid = ssf.Windows.run(vscodePath + "\\Code.exe", [currentDirectory])
@@ -59,16 +59,20 @@ async function init_env() {
 
     //将所需文件都下载下来 分别是vs插件 语音生成模型 以及vscode
     const urls = []
-    if (await sha_file("./temp/vscode-deno.vsix") != "2023cabd73ebb1a3a70cba986ac88f19d73d66333f1e3b5f627b9366cf32fceb") {
-        urls.push("https://github.com/denoland/vscode_deno/releases/download/3.37.0/vscode-deno.vsix");
+    if (await sha_file("./temp/vscode-deno.vsix") != "7f042f02ac985e0da80145d479ff675bf5b36468a5971d174725ddfdc332ec7a") {
+        console.log("插件sha", await sha_file("./temp/vscode-deno.vsix"))
+
+        urls.push("https://github.com/denoland/vscode_deno/releases/download/3.44.2/vscode-deno.vsix");
 
     }
     // if (await sha_file("./temp/vits-zh-aishell3.zip") != "ffcd234452345af05923853275744bf5d2d3c8ef71d55740e5a9c69e6651e258" && is_tts) {
     //     urls.push("https://hub.nuaa.cf/SSFRPA/ssf/releases/download/models/vits-zh-aishell3.zip")
     // }
 
-    if (await sha_file("./temp/VSCodeUserSetup-x64-1.88.1.exe") != "487b08f664da5845cfa5fb63adc958b68eb2b58aaf5542d894f0a2a4bf93444c" && vscodePath == "未找到") {
-        urls.push("https://vscode.download.prss.microsoft.com/dbazure/download/stable/e170252f762678dec6ca2cc69aba1570769a5d39/VSCodeUserSetup-x64-1.88.1.exe")
+    if (await sha_file("./temp/VSCodeUserSetup-x64-1.100.3.exe") != "a7e37b9cf6d47beb4c564d167022ca324bfeb971944f21a9ce87e953e154a52b" && vscodePath == "未找到") {
+        console.log("vscode sha", await sha_file("./temp/VSCodeUserSetup-x64-1.100.3.exe"))
+
+        urls.push("https://vscode.download.prss.microsoft.com/dbazure/download/stable/258e40fedc6cb8edf399a463ce3a9d32e7e1f6f3/VSCodeUserSetup-x64-1.100.3.exe")
     }
 
     // if (await sha_file("./temp/vs_deno_config.zip") != "ede10c55bfdd21c64471e8278b978c98ab697337f0ac51795c6e9180e6b6cd9a") {
@@ -78,7 +82,7 @@ async function init_env() {
     if (urls.length > 0) {
         await ssf.Request.download(urls, "./temp", 1, 5, "")
     }
-
+    // ssf.Sys.sleep(200000)
 
     // if (!existsSync('./.vscode')) {
     //     await decompress("./temp/vs_deno_config.zip", "./")

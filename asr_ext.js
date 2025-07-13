@@ -1,8 +1,10 @@
 import * as ui_until from "./ui_untils.js";
+import * as cmd_server from "./comman_server.ts";
+import * as media_server from "./media_server.ts";
 
-ssf.Frame.init()
 ssf.ai.Device.init_audio()
-
+await media_server.init_server()
+await cmd_server.init_server()
 const voice1 = ssf.ai.Device.load_audio("./voice_files/1.wav")
 const voice2 = ssf.ai.Device.load_audio("./voice_files/2.mp3")
 
@@ -22,7 +24,7 @@ if (!ssf.ai.Device.check_default_output_device()) {
 
 ssf.ai.ASR.listen_input("./models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20", "./models/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01", 2.4, 0.01, 10.0, 0);
 ssf.ai.ASR.enable_capslock_listen(false)
-ssf.ai.ASR.enable_kws(true)
+ssf.ai.ASR.enable_kws(false)
 console.log("开始监听麦克风");
 let min_startTime = 0
 let max_startTime = 0
@@ -46,7 +48,7 @@ async function break_command() {
             'Content-Type': 'application/json'
         },
         data: JSON.stringify(data),
-        timeout: 5000 // 5秒超时
+        timeout: 2000 // 2秒超时
     };
     await ssf.Request.post([requestModel]);
 }

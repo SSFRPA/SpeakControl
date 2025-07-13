@@ -2,10 +2,10 @@
 
 
 export function run(text) {
-    if (globalThis.det_pid) {
-        ssf.Windows.kill_process(globalThis.det_pid)
+    // if (globalThis.det_pid) {
+    //     ssf.Windows.kill_process(globalThis.det_pid)
 
-    }
+    // }
     ssf.Sys.sleep(500)
     let num = extractNumber(text)
     if (isNumeric(num)) {

@@ -1,270 +1,224 @@
-// export function det_element(control_type, isshow = true) {
-//     if (globalThis.det_pid) {
-//         ssf.Windows.kill_process(globalThis.det_pid)
-//         ssf.Sys.sleep(300)
-//     }
-//     globalThis.det_data.length = 0
-//     const hwnd = ssf.Windows.get_foreground_window()
-//     const ele = ssf.ElementExt.parse(hwnd, "/", 3000)
-//     console.log("当前定位窗口",ele.name())
-//     const result = []
-//     recursiveTraversal(ele, control_type, result)
-//     // const data=[]
-//     let index = 1;
-//     result.forEach(element => {
-//         const rect = element.bounding_rectangle()
-//         console.log(JSON.stringify(rect), element.name())
-//         globalThis.det_data.push({
-//             x: Math.floor((rect.x + rect.w / 2)),
-//             y: Math.floor((rect.y + rect.h / 2)),
-//             // x: rect.x,
-//             // y: rect.y,
-//             r: 200,
-//             g: 200,
-//             b: 30,
-//             a: 0,
-//             font_size: 10,
-//             radius: 15,
-//             text: index.toString()
-//             // text:element.name()
+// === 工具函数 ===
 
-
-//         })
-//         index = index + 1
-//     });
-//     // console.log(JSON.stringify(globalThis.det_data))
-//     if (isshow) {
-//         // const pid = ssf.Windows.run("./ui_ext/ssf_ui.exe", [JSON.stringify(det_data)])
-//         const pid = ssf.Windows.run("./ui_ext/ssf_ui.exe", [JSON.stringify(globalThis.det_data)])
-//         console.log(pid)
-
-//         globalThis.det_pid = pid;
-//     } else {
-//         globalThis.det_pid = null;
-//     }
-
-
-
+// function isIntersecting(rect1, rect2) {
+//     return !(
+//         rect2.x >= rect1.x + rect1.w ||
+//         rect2.x + rect2.w <= rect1.x ||
+//         rect2.y >= rect1.y + rect1.h ||
+//         rect2.y + rect2.h <= rect1.y
+//     );
 // }
+function isIntersecting(rect1, rect2) {
+    const x_overlap = Math.max(0, Math.min(rect1.x + rect1.w, rect2.x + rect2.w) - Math.max(rect1.x, rect2.x));
+    const y_overlap = Math.max(0, Math.min(rect1.y + rect1.h, rect2.y + rect2.h) - Math.max(rect1.y, rect2.y));
+    const intersectionArea = x_overlap * y_overlap;
+
+    const area1 = rect1.w * rect1.h;
+    const area2 = rect2.w * rect2.h;
+
+    // 如果交集面积超过任一矩形的 20%，就算重叠
+    return (
+        intersectionArea / area1 > 0.2 ||
+        intersectionArea / area2 > 0.2
+    );
+}
 
 
-function recursiveTraversal(element, control_type, result) {
-
-    if (element) {
-        for (const t of control_type) {
-            if (element.control_type().startsWith(t) && !element.is_offscreen()) {
-
-                // console.log(element.control_type(),control_type)
-                // console.log(element.name(), element.control_type())
-                result.push(element)
-            }
-        }
-
-        // if(element.name()!=""){
-        //     result.push(element)
-
-        // }
-
-
-        const children = element.childs();
-        for (const child of children) {
-            recursiveTraversal(child, control_type, result);
-            // result.push(element)
+function isOverlappingAny(rect, existingRects) {
+    for (const r of existingRects) {
+        if (isIntersecting(rect, r)) {
+            return true;
         }
     }
-    return null;
+    return false;
 }
+
+function getRandomColor() {
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// === 遍历函数，带重叠过滤 ===
+
+function recursiveTraversal(element, control_type, result, rectList) {
+    if (!element) return;
+    for (const t of control_type) {
+        if (element.control_type().startsWith(t) && !element.is_offscreen()) {
+            const rect = element.bounding_rectangle();
+            if (!isOverlappingAny(rect, rectList)) {
+                result.push(element);
+                rectList.push(rect);
+            }
+        }
+    }
+    const children = element.childs();
+    for (const child of children) {
+        recursiveTraversal(child, control_type, result, rectList);
+    }
+}
+
+// === 任务栏按钮扫描函数 ===
+
 export function task_bar() {
-    const temp = ssf.ElementExt.get_root_element().childs()
-    const result = []
+    const temp = ssf.ElementExt.get_root_element().childs();
+    const result = [];
+    const rectList = [];
+    const client_data = [];
+
     for (const t of temp) {
-        // console.log(t.name())
-        if (t.name() == "任务栏") {
-            const task_bar_eles = t.childs()
+        if (t.name() === "任务栏") {
+            const task_bar_eles = t.childs();
             for (const task_bar_ele of task_bar_eles) {
-                if (task_bar_ele.name() == "DesktopWindowXamlSource") {
-                    recursiveTraversal(task_bar_ele, ["Button"], result);
+                if (task_bar_ele.name() === "DesktopWindowXamlSource") {
+                    recursiveTraversal(task_bar_ele, ["Button"], result, rectList);
                 }
             }
-            result.push(t)
-
         }
     }
-    // console.log(result)
 
-    let index = 1;
-    const det_data = []
-    globalThis.det_data.length = 0
+    const det_data = [];
+    globalThis.det_data.length = 0;
     const dpi = globalThis.dpi_ratio;
-    result.forEach(element => {
-        const rect = element.bounding_rectangle()
-        // console.log(JSON.stringify(rect), element.name())
+    let index = 1;
+
+    for (const element of result) {
+        const rect = element.bounding_rectangle();
+
         globalThis.det_data.push({
-            x: Math.floor((rect.x + rect.w / 2)),
-            y: Math.floor((rect.y + rect.h / 2)),
-            // x: parseInt(rect.x / dpi),
-            // y: parseInt(rect.y / dpi),
-            // width: parseInt(rect.w / dpi),
-            // height: parseInt(rect.h / dpi),
-            // x: rect.x,
-            // y: rect.y,
+            x: Math.floor(rect.x + rect.w / 2),
+            y: Math.floor(rect.y + rect.h / 2),
             r: 200,
             g: 200,
             b: 30,
             a: 0.2,
             font_size: 10,
             text: "",
-            // radius: 15,
             id: index,
             delay: 8000,
             border_only: true,
+        });
 
-            // text:element.name()
-
-
-        })
-        const color = getRandomColor()
+        const color = getRandomColor();
         det_data.push({
             x: parseInt(rect.x / dpi),
             y: parseInt(rect.y / dpi),
             width: parseInt(rect.w / dpi),
             height: parseInt(rect.h / dpi),
-            // x: rect.x,
-            // y: rect.y,
             r: color.r,
             g: color.g,
             b: color.b,
             a: 0.2,
             font_size: 10,
             text: "",
-            // radius: 15,
             id: index,
             delay: 8000,
             border_only: true,
+        });
+        client_data.push({
+            id: index,
+            name: element.name(),
+        });
 
-        })
-        index = index + 1
-    });
-    const data = {
-        "is_focus": true,
-        "scroll_y": 0,
-        "detData": det_data,
-        "restart": false
+        index++;
     }
 
-
-    const requestModel = {
-        url: 'http://127.0.0.1:51515/det_data',
-        header: {
-            'Content-Type': 'application/json'
-        },
-        data: JSON.stringify(data),
-        timeout: 5000 // 5秒超时
+    const data = {
+        is_focus: true,
+        scroll_y: 0,
+        detData: det_data,
+        restart: false,
     };
 
-    ssf.Request.post([requestModel])
-        .then((results) => {
-            const result = results[0];
-            // console.log(`请求成功: ${result.url}`);
-        })
-        .catch((error) => {
-            // console.error('请求失败:', error);
-        });
+    const requestModel = {
+        url: "http://127.0.0.1:51515/det_data",
+        header: { "Content-Type": "application/json" },
+        data: JSON.stringify(data),
+        timeout: 5000,
+    };
+
+    ssf.Request.post([requestModel]).catch(() => { });
+    return client_data;
 
 }
 
+// === 通用元素检测函数 ===
 
 export function det_element(control_type) {
+    const hwnd = ssf.Windows.get_foreground_window();
+    ssf.ElementExt.enabled_automation(hwnd)
+    const ele = ssf.ElementExt.parse(hwnd, "/", 3000);
 
+    console.log("当前定位窗口", ele.name());
 
-    const hwnd = ssf.Windows.get_foreground_window()
-    const ele = ssf.ElementExt.parse(hwnd, "/", 3000)
+    const result = [];
+    const rectList = [];
+    recursiveTraversal(ele, control_type, result, rectList);
 
-    console.log("当前定位窗口", ele.name())
-    const result = []
-    recursiveTraversal(ele, control_type, result)
-    // const data=[]
-    let index = 1;
-    const det_data = []
-    globalThis.det_data.length = 0
+    const det_data = [];
+    const client_data = [];
+    globalThis.det_data.length = 0;
     const dpi = globalThis.dpi_ratio;
-    result.forEach(element => {
-        const rect = element.bounding_rectangle()
-        // console.log(JSON.stringify(rect), element.name())
+    let index = 1;
+
+    for (const element of result) {
+        const rect = element.bounding_rectangle();
+
         globalThis.det_data.push({
-            x: Math.floor((rect.x + rect.w / 2)),
-            y: Math.floor((rect.y + rect.h / 2)),
-            // x: parseInt(rect.x / dpi),
-            // y: parseInt(rect.y / dpi),
-            // width: parseInt(rect.w / dpi),
-            // height: parseInt(rect.h / dpi),
-            // x: rect.x,
-            // y: rect.y,
-            r: 200,
+            x: Math.floor(rect.x + rect.w / 2),
+            y: Math.floor(rect.y + rect.h / 2),
             g: 200,
             b: 30,
             a: 0.2,
             font_size: 10,
             text: "",
-            // radius: 15,
             id: index,
             delay: 8000,
             border_only: true,
+        });
 
-            // text:element.name()
-
-
-        })
-        const color = getRandomColor()
+        const color = getRandomColor();
         det_data.push({
             x: parseInt(rect.x / dpi),
             y: parseInt(rect.y / dpi),
             width: parseInt(rect.w / dpi),
             height: parseInt(rect.h / dpi),
-            // x: rect.x,
-            // y: rect.y,
             r: color.r,
             g: color.g,
             b: color.b,
             a: 0.2,
             font_size: 10,
             text: "",
-            // radius: 15,
             id: index,
             delay: 8000,
             border_only: true,
-
-        })
-        index = index + 1
-    });
-    const data = {
-        "is_focus": false,
-        "scroll_y": 0,
-        "detData": det_data,
-        "restart": false
-
-    }
-
-
-    const requestModel = {
-        url: 'http://127.0.0.1:51515/det_data',
-        header: {
-            'Content-Type': 'application/json'
-        },
-        data: JSON.stringify(data),
-        timeout: 5000 // 5秒超时
-    };
-
-    ssf.Request.post([requestModel])
-        .then((results) => {
-            const result = results[0];
-            // console.log(`请求成功: ${result.url}`);
-        })
-        .catch((error) => {
-            // console.error('请求失败:', error);
         });
 
+        client_data.push({
+            id: index,
+            name: element.name(),
+        });
+
+        index++;
+    }
+
+    const data = {
+        is_focus: false,
+        scroll_y: 0,
+        detData: det_data,
+        restart: false,
+    };
+
+    const requestModel = {
+        url: "http://127.0.0.1:51515/det_data",
+        header: { "Content-Type": "application/json" },
+        data: JSON.stringify(data),
+        timeout: 5000,
+    };
+
+    ssf.Request.post([requestModel]).catch(() => { });
+    return client_data;
 }
+
+
 
 
 const colors = [
@@ -308,11 +262,8 @@ const colors = [
     { r: 32, g: 178, b: 170 }, { r: 85, g: 107, b: 47 }
 ];
 
-function getRandomColor() {
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+// function getRandomColor() {
+//     return colors[Math.floor(Math.random() * colors.length)];
+// }
 
 
-// globalThis.det_data=[]
-// globalThis.dpi_ratio=1.5
-// task_bar()

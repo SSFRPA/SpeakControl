@@ -53,7 +53,7 @@ if (show_tray) {
       systray.sendAction({
         type: 'update-item',
         item: Item1,
-      })
+      }) 
     }
   }
 
@@ -74,8 +74,8 @@ if (show_tray) {
       icon: Deno.build.os === 'windows' ? `./icos/ico.ico` : './icos/ico.png',
       // A template icon is a transparency mask that will appear to be dark in light mode and light in dark mode
       isTemplateIcon: Deno.build.os === 'darwin',
-      title: "Title",
-      tooltip: "Tooltip",
+      title: "语音控制",
+      tooltip: "语音控制",
       items: [
         Item1,
         // Item2,

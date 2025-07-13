@@ -1,0 +1,6 @@
+password: a12345
+port: 8956
+media_port: 8957
+host: 0.0.0.0
+enable_asr: true
+enable_kws: false
